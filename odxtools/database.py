@@ -76,19 +76,22 @@ class Database:
         self._id_lookup = {}
 
         @lru_cache(maxsize=None)
-        def get_lookups(layer: Union[DiagLayerContainer, DiagLayer]) -> dict:
+        def get_lookups(layer: Union[DiagLayerContainer, DiagLayer], docnames = None) -> dict:
             lookup = layer._build_id_lookup()
+            docnames = set(docnames or [])
+            docnames.add(layer.short_name)
             result = dict(lookup)
             for key, value in dict(lookup).items():
                 # In case an ID-REF uses a DOCREF
-                result[layer.short_name + ">" + key] = value
+                for docname in docnames:
+                    result[docname + ">" + key] = value
             return result
 
         for dlc in self.diag_layer_containers:
             self.id_lookup.update(get_lookups(dlc))
 
-        for dl in self.diag_layers:
-            self.id_lookup.update(get_lookups(dl))
+            for dl in dlc.diag_layers:
+                self.id_lookup.update(get_lookups(dl, [dlc.short_name]))
         
         # Resolve references
         for dlc in self.diag_layer_containers:
