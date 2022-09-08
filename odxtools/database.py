@@ -91,7 +91,7 @@ class Database:
             self.id_lookup.update(get_lookups(dlc))
 
             for dl in dlc.diag_layers:
-                self.id_lookup.update(get_lookups(dl, [dlc.short_name]))
+                self.id_lookup.update(get_lookups(dl, tuple([dlc.short_name])))
         
         # Resolve references
         for dlc in self.diag_layer_containers:
@@ -102,7 +102,7 @@ class Database:
         for dl_type_name in ["ECU-SHARED-DATA", "PROTOCOL", "FUNCTIONAL-GROUP", "BASE-VARIANT", "ECU-VARIANT"]:
             dl: DiagLayer
             for dl in self.diag_layers:
-                if dl.variant_type in dl_type_name:
+                if dl.variant_type == dl_type_name:
                     dl_lookup = dict(docref_lookup)
                     for parent_ref in dl.parent_refs:
                         parent_ref._resolve_references(self.id_lookup)
